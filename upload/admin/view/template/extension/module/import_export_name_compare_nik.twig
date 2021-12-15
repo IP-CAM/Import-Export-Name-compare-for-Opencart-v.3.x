@@ -1,0 +1,742 @@
+{{ header }}
+<style>
+  .top-link-row {
+    background-color: #E0E0E0;
+    width: 100%;
+    padding: 5px;
+  }
+  .top-link-row a {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #ECECEC;
+    text-align: center;
+    color: black;
+    margin-right: 2px;
+  }
+  .top-link-row a.active {
+    background-color: #fff;
+  }
+  .checkbox-margin-top {
+    margin-top: 12px !important;
+  }
+
+  .lds-ring {
+    display: none;
+    position: relative;
+    top: 150px;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    z-index: 999;
+  }
+  .lds-ring div {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    margin: 8px;
+    border: 8px solid #333;
+    border-radius: 50%;
+    animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: #333 transparent transparent transparent;
+  }
+  .lds-ring div:nth-child(1) {
+    animation-delay: -0.45s;
+  }
+  .lds-ring div:nth-child(2) {
+    animation-delay: -0.3s;
+  }
+  .lds-ring div:nth-child(3) {
+    animation-delay: -0.15s;
+  }
+  @keyframes lds-ring {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+{#        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>#}
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if error_empty_products %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_empty_products }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    {% if error_empty_categories %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_empty_categories }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    {% if error_empty_upload_file %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_empty_upload_file }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    {% if success %}
+      <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    <div class="top-link-row">
+      <a {% if type == 'categories' %}class="active"{% endif %} href="{{ link_categories }}">{{ text_categories }}</a>
+      <a {% if type == 'products' %}class="active"{% endif %} href="{{ link_products }}">{{ text_products }}</a>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <div class="lds-ring">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+        {% if type == 'categories' %}
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab-export" data-toggle="tab">{{ tab_export }}</a></li>
+            <li><a href="#tab-import" data-toggle="tab">{{ tab_import }}</a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-export">
+              <form action="{{ actionExportCategories }}" method="post" enctype="multipart/form-data" id="form-export-categories" class="form-horizontal">
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-category-name">{{ entry_category_list }}</label>
+                  <div class="col-sm-10">
+                    <select name="products_categories" id="select-categories" class="form-control">
+                      <option selected="selected" disabled="disabled">{{ text_categories }}</option>
+                      <option value="0">{{ text_all }}</option>
+                      {% for category in categories %}
+                        <option value="{{ category.category_id }}">{{ category.name }}</option>
+                      {% endfor %}
+                    </select>
+                    <div id="export-category" class="well well-sm" style="height: 150px; overflow: auto;">
+
+                    </div>
+                    <button class="btn btn-danger category-clear-btn" type="button">{{ button_clear }}</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-category-name">{{ entry_category_name }}</label>
+                  <div class="col-sm-2">
+                    <input name="category_name" type="checkbox" class="form-control checkbox-margin-top" id="input-category-name">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-category-description">{{ entry_category_description }}</label>
+                  <div class="col-sm-2">
+                    <input name="category_description" type="checkbox" class="form-control checkbox-margin-top" id="input-category-description">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-category-meta-title">{{ entry_category_meta_title }}</label>
+                  <div class="col-sm-2">
+                    <input name="category_meta_title" type="checkbox" class="form-control checkbox-margin-top" id="input-category-meta-title">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-category-meta-description">{{ entry_category_meta_description }}</label>
+                  <div class="col-sm-2">
+                    <input name="category_meta_description" type="checkbox" class="form-control checkbox-margin-top" id="input-category-meta-description">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-category-meta-keywords">{{ entry_category_meta_keywords }}</label>
+                  <div class="col-sm-2">
+                    <input name="category_meta_keywords" type="checkbox" class="form-control checkbox-margin-top" id="input-category-meta-keywords">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-category-parent">{{ entry_category_parent }}</label>
+                  <div class="col-sm-2">
+                    <input name="category_parent" type="checkbox" class="form-control checkbox-margin-top" id="input-category-parent">
+                  </div>
+                </div>
+                <hr>
+                <div class="pull-left">
+                  <button type="button" class="btn btn-success select-category-options">{{ button_select_all }}</button>
+                  <button type="button" class="btn btn-danger unselect-category-options">{{ button_unselect_all }}</button>
+                </div>
+                <div class="pull-right">
+                  <button type="submit" form="form-export-categories" class="btn btn-primary">{{ button_export }}</button>
+                </div>
+              </form>
+            </div>
+            <div class="tab-pane" id="tab-import">
+              <form action="{{ actionImportCategories }}" method="post" enctype="multipart/form-data" id="form-import-categories" class="form-horizontal">
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-category-import">{{ entry_category_import }}</label>
+                  <div class="col-sm-10">
+                    <input name="upload" type="file" class="form-control" id="input-category-import" accept=".xlsx, .xls">
+                  </div>
+                </div>
+                <div class="pull-right">
+                  <button type="button" id="import-categories-btn" form="form-import-categories" class="btn btn-primary">{{ button_import }}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <script>
+              let importFile;
+
+              // заполняем переменную данными, при изменении значения поля file
+              $('input[type=file]').on('change', function(){
+                  importFile = this.files;
+              });
+
+              $('#import-categories-btn').on('click', function () {
+                  if ($("#input-category-import")[0].files[0]) {
+                      var dataFiles = new FormData();
+
+                      // заполняем объект данных файлами в подходящем для отправки формате
+                      dataFiles.append( "file", $("#input-category-import")[0].files[0] );
+
+                      // AJAX запрос
+                      $.ajax({
+                          url         : 'index.php?route=extension/module/import_export_name_compare_nik/importCategories&type=products&user_token={{ user_token }}',
+                          type        : 'POST', // важно!
+                          data        : dataFiles,
+                          cache       : false,
+                          dataType    : 'json',
+                          // отключаем обработку передаваемых данных, пусть передаются как есть
+                          processData : false,
+                          // отключаем установку заголовка типа запроса. Так jQuery скажет серверу что это строковой запрос
+                          contentType : false,
+                          beforeSend: function(){
+                              // Действия, которые будут выполнены перед выполнением этого ajax-запроса
+                              $('.lds-ring').css('display', 'inline');
+                          },
+                          complete: function(){
+                              // Действия, которые будут выполнены после завершения ajax-запроса
+                              $('.lds-ring').css('display', 'none');
+                              location = '{{ reload_link }}&user_token={{ user_token }}&type=categories'
+                          },
+                          // функция успешного ответа сервера
+                          success     : function( respond, status, jqXHR ) {
+
+                              // ОК - файлы загружены
+                              if( typeof respond.error === 'undefined' ) {
+                                  $('#dropped-files #upload-button .delete').click()
+                              }
+                              // ошибка
+                              else {
+                                  console.log('ОШИБКА: ' + respond.data );
+                              }
+                          },
+                          // функция ошибки ответа сервера
+                          error: function( jqXHR, status, errorThrown ) {
+                              console.log( 'ОШИБКА AJAX запроса: ' + status, jqXHR );
+                          }
+
+                      });
+                  }
+              })
+          </script>
+          <script>
+              $('#export-category').delegate('.fa-minus-circle', 'click', function() {
+                  $(this).parent().remove();
+              });
+              $('#select-categories').on('change', function() {
+                  let categoryId   = $(this).val()
+                  $.ajax({
+                      url: 'index.php?route=extension/module/import_export_name_compare_nik/getCategoryByCategory&user_token={{ user_token }}&category_id=' +  categoryId,
+                      dataType: 'json',
+                      success: function(json) {
+                          let array = $.map(json, function(item) {
+                              return {
+                                  label: item['name'],
+                                  value: item['category_id']
+                              }
+                          })
+                          for (let item in array) {
+                              if(array.hasOwnProperty(item)) {
+                                  $('#export-category' + array[item]['value']).remove();
+                                  $('#export-category').append('<div id="export-category' + array[item]['value'] + '"><i class="fa fa-minus-circle"></i> ' + array[item]['label'] + '<input type="hidden" name="category[]" value="' + array[item]['value'] + '" /></div>');
+                              }
+                          }
+                      }
+                  });
+              })
+              $('.category-clear-btn').on('click', function () {
+                  clearCategoryList()
+              })
+              function clearCategoryList() {
+                  $('#export-category div').each(function (i, item) {
+                      $(item).remove()
+                  })
+                  $('#select-categories option:first').prop('selected', true);
+              }
+          </script>
+          <script>
+            $('.select-category-options').on('click', function () {
+              $('input[type="checkbox"]').prop('checked', true)
+            })
+            $('.unselect-category-options').on('click', function () {
+                $('input[type="checkbox"]').prop('checked', false)
+            })
+          </script>
+        {% elseif type == 'products' %}
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab-export" data-toggle="tab">{{ tab_export }}</a></li>
+            <li><a href="#tab-import" data-toggle="tab">{{ tab_import }}</a></li>
+            <li><a href="#tab-import-product-images" data-toggle="tab">{{ tab_import_images }}</a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-export">
+              <form action="{{ actionExportProducts }}" method="post" enctype="multipart/form-data" id="form-export-products" class="form-horizontal">
+                <div class="form-group" id="categories-row">
+                  <label class="col-sm-2 control-label" for="select-products-categories">{{ entry_products_list }}</label>
+                  <div class="col-sm-10">
+                    <select name="products_categories" id="select-products-categories" class="form-control">
+                      <option selected="selected" disabled="disabled">{{ text_categories }}</option>
+                      <option value="0">{{ text_all }}</option>
+                      {% for category in categories %}
+                        <option value="{{ category.category_id }}">{{ category.name }}</option>
+                      {% endfor %}
+                    </select>
+                    <div id="list-category" class="well well-sm" style="height: 150px; overflow: auto;">
+
+                    </div>
+                    <br>
+                    <input type="text" name="product_name" value="" placeholder="{{ entry_products_list }}" id="input-product" class="form-control" />
+                    <div id="export-product" class="well well-sm" style="height: 150px; overflow: auto;">
+
+                    </div>
+                    <button class="btn btn-danger products-clear-btn" type="button">{{ button_clear }}</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-product-name">{{ entry_product_name }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_name" type="checkbox" class="form-control checkbox-margin-top" id="input-product-name">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-description">{{ entry_product_description }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_description" type="checkbox" class="form-control checkbox-margin-top" id="input-product-description">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-meta-title">{{ entry_product_meta_title }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_meta_title" type="checkbox" class="form-control checkbox-margin-top" id="input-product-meta-title">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-product-meta-description">{{ entry_product_meta_description }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_meta_description" type="checkbox" class="form-control checkbox-margin-top" id="input-product-meta-description">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-meta-keywords">{{ entry_product_meta_keywords }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_meta_keywords" type="checkbox" class="form-control checkbox-margin-top" id="input-product-meta-keywords">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-tags">{{ entry_product_tags }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_tags" type="checkbox" class="form-control checkbox-margin-top" id="input-product-tags">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-product-model">{{ entry_product_model }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_model" type="checkbox" class="form-control checkbox-margin-top" id="input-product-model">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-sku">{{ entry_product_sku }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_sku" type="checkbox" class="form-control checkbox-margin-top" id="input-product-sku">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-location">{{ entry_product_location }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_location" type="checkbox" class="form-control checkbox-margin-top" id="input-product-location">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-product-price">{{ entry_product_price }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_price" type="checkbox" class="form-control checkbox-margin-top" id="input-product-price">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-quantity">{{ entry_product_quantity }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_quantity" type="checkbox" class="form-control checkbox-margin-top" id="input-product-quantity">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-minimum">{{ entry_product_minimum }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_minimum" type="checkbox" class="form-control checkbox-margin-top" id="input-product-minimum">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-product-shipping">{{ entry_product_shipping }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_shipping" type="checkbox" class="form-control checkbox-margin-top" id="input-product-shipping">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-date-available">{{ entry_product_date_available }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_date_available" type="checkbox" class="form-control checkbox-margin-top" id="input-product-date-available">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-length">{{ entry_product_length }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_length" type="checkbox" class="form-control checkbox-margin-top" id="input-product-length">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-product-length-class">{{ entry_product_length_class }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_length_class" type="checkbox" class="form-control checkbox-margin-top" id="input-product-length-class">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-weight">{{ entry_product_weight }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_weight" type="checkbox" class="form-control checkbox-margin-top" id="input-product-weight">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-weight-class">{{ entry_product_weight_class }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_weight_class" type="checkbox" class="form-control checkbox-margin-top" id="input-product-weight-class">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-product-status">{{ entry_product_status }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_status" type="checkbox" class="form-control checkbox-margin-top" id="input-product-status">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-sort-order">{{ entry_product_sort_order }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_sort_order" type="checkbox" class="form-control checkbox-margin-top" id="input-product-sort-order">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-manufacturer">{{ entry_product_manufacturer }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_manufacturer" type="checkbox" class="form-control checkbox-margin-top" id="input-product-manufacturer">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-product-categories">{{ entry_product_categories }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_categories" type="checkbox" class="form-control checkbox-margin-top" id="input-product-categories">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-discount">{{ entry_product_discount }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_discount" type="checkbox" class="form-control checkbox-margin-top" id="input-product-discount">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-special">{{ entry_product_special }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_special" type="checkbox" class="form-control checkbox-margin-top" id="input-product-special">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-product-reward">{{ entry_product_reward }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_reward" type="checkbox" class="form-control checkbox-margin-top" id="input-product-reward">
+                  </div>
+                  <label class="col-sm-2 control-label" for="input-product-stock-status">{{ entry_product_stock_status }}</label>
+                  <div class="col-sm-2">
+                    <input name="product_stock_status" type="checkbox" class="form-control checkbox-margin-top" id="input-product-stock-status">
+                  </div>
+                </div>
+                <hr>
+                <div class="pull-left">
+                  <button type="button" class="btn btn-success select-product-options">{{ button_select_all }}</button>
+                  <button type="button" class="btn btn-danger unselect-product-options">{{ button_unselect_all }}</button>
+                </div>
+                <div class="pull-right">
+                  <button type="submit" form="form-export-products" class="btn btn-primary">{{ button_export }}</button>
+                </div>
+              </form>
+            </div>
+            <div class="tab-pane" id="tab-import">
+              <form action="{{ actionImportProducts }}" method="post" enctype="multipart/form-data" id="form-import-products" class="form-horizontal">
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-product-import">{{ entry_sheet_title_name_compare }}</label>
+                  <div class="col-sm-10">
+                    <div class="row">
+                      <div class="col-sm-2">
+                        <label class="col-sm-10 control-label" for="input-sheet-brand-status">{{ entry_sheet_brand }}</label>
+                        <input name="brand" type="checkbox" class="form-control checkbox-margin-top col-sm-2 sheet_status" id="input-sheet-brand-status">
+                      </div>
+                      <div class="col-sm-2">
+                        <label class="col-sm-10 control-label" for="input-sheet-seria-status">{{ entry_sheet_seria }}</label>
+                        <input name="seria" type="checkbox" class="form-control checkbox-margin-top col-sm-2 sheet_status" id="input-sheet-seria-status">
+                      </div>
+                      <div class="col-sm-2">
+                        <label class="col-sm-10 control-label" for="input-sheet-what-status">{{ entry_sheet_what }}</label>
+                        <input name="what" type="checkbox" class="form-control checkbox-margin-top col-sm-2 sheet_status" id="input-sheet-what-status">
+                      </div>
+                      <div class="col-sm-2">
+                        <label class="col-sm-10 control-label" for="input-sheet-type-status">{{ entry_sheet_type }}</label>
+                        <input name="type" type="checkbox" class="form-control checkbox-margin-top col-sm-2 sheet_status" id="input-sheet-type-status">
+                      </div>
+                      <div class="col-sm-2">
+                        <label class="col-sm-10 control-label" for="input-sheet-action-status">{{ entry_sheet_action }}</label>
+                        <input name="action" type="checkbox" class="form-control checkbox-margin-top col-sm-2 sheet_status" id="input-sheet-action-status">
+                      </div>
+                      <div class="col-sm-2">
+                        <label class="col-sm-10 control-label" for="input-sheet-attributs-status">{{ entry_sheet_attributs }}</label>
+                        <input name="attributs" type="checkbox" class="form-control checkbox-margin-top col-sm-2 sheet_status" id="input-sheet-attributs-status">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-product-import">{{ entry_product_import }}</label>
+                  <div class="col-sm-10">
+                    <input name="upload" type="file" class="form-control" id="input-product-import" accept=".xlsx, .xls">
+                  </div>
+                </div>
+                <div class="pull-right">
+                  <button type="button" id="import-products-btn" form="form-import-products" class="btn btn-primary">{{ button_import }}</button>
+                </div>
+              </form>
+            </div>
+            <div class="tab-pane" id="tab-import-product-images">
+              <form action="{{ actionImportProductImages }}" method="post" enctype="multipart/form-data" id="form-import-product-images" class="form-horizontal">
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-import-product-images">{{ entry_images_import }}</label>
+                  <div class="col-sm-10">
+                    <input name="upload" type="file" class="form-control" id="input-import-product-images" accept=".zip">
+                  </div>
+                </div>
+                <div class="pull-right">
+                  <button type="button" id="import-product-images-btn" form="form-import-product-images" class="btn btn-primary">{{ button_import }}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <script>
+              let importFile;
+
+              // заполняем переменную данными, при изменении значения поля file
+              $('input[type=file]').on('change', function(){
+                  importFile = this.files;
+              });
+
+              $('#import-products-btn').on('click', function () {
+                  if ($("#input-product-import")[0].files[0]) {
+                      var dataFiles = new FormData();
+
+                      let brand_title_status = $('input.sheet_status')
+                      let brandTitleStatusArray = []
+
+                      for (let i = 0; i < brand_title_status.length; i++) {
+                          if ($(brand_title_status[i]).prop('checked')) {
+                              brandTitleStatusArray.push(brand_title_status[i].name)
+                          }
+                      }
+
+                      // заполняем объект данных файлами в подходящем для отправки формате
+                      dataFiles.append( "file", $("#input-product-import")[0].files[0] );
+                      dataFiles.append( "name_compare", brandTitleStatusArray.toString() );
+
+                      // AJAX запрос
+                      $.ajax({
+                          url         : 'index.php?route=extension/module/import_export_name_compare_nik/importProducts&type=products&user_token={{ user_token }}',
+                          type        : 'POST', // важно!
+                          data        : dataFiles,
+                          cache       : false,
+                          dataType    : 'json',
+                          // отключаем обработку передаваемых данных, пусть передаются как есть
+                          processData : false,
+                          // отключаем установку заголовка типа запроса. Так jQuery скажет серверу что это строковой запрос
+                          contentType : false,
+                          beforeSend: function(){
+                              // Действия, которые будут выполнены перед выполнением этого ajax-запроса
+                              $('.lds-ring').css('display', 'inline');
+                          },
+                          complete: function(){
+                              // Действия, которые будут выполнены после завершения ajax-запроса
+                              $('.lds-ring').css('display', 'none');
+                              location = '{{ reload_link }}&user_token={{ user_token }}&type=products'
+                          },
+                          // функция успешного ответа сервера
+                          success     : function( respond, status, jqXHR ) {
+
+                              // ОК - файлы загружены
+                              if( typeof respond.error === 'undefined' ) {
+                                  $('#dropped-files #upload-button .delete').click()
+                              }
+                              // ошибка
+                              else {
+                                  console.log('ОШИБКА: ' + respond.data );
+                              }
+                          },
+                          // функция ошибки ответа сервера
+                          error: function( jqXHR, status, errorThrown ) {
+                              console.log( 'ОШИБКА AJAX запроса: ' + status, jqXHR );
+                          }
+
+                      });
+                  }
+              })
+
+              $('#import-product-images-btn').on('click', function () {
+                  if ($("#input-import-product-images")[0].files[0]) {
+                      var dataFiles = new FormData();
+
+                      // заполняем объект данных файлами в подходящем для отправки формате
+                      dataFiles.append( "file", $("#input-import-product-images")[0].files[0] );
+
+                      // AJAX запрос
+                      $.ajax({
+                          url         : 'index.php?route=extension/module/import_export_name_compare_nik/importProductImages&type=products&user_token={{ user_token }}',
+                          type        : 'POST', // важно!
+                          data        : dataFiles,
+                          cache       : false,
+                          dataType    : 'json',
+                          // отключаем обработку передаваемых данных, пусть передаются как есть
+                          processData : false,
+                          // отключаем установку заголовка типа запроса. Так jQuery скажет серверу что это строковой запрос
+                          contentType : false,
+                          beforeSend: function(){
+                              // Действия, которые будут выполнены перед выполнением этого ajax-запроса
+                              $('.lds-ring').css('display', 'inline');
+                          },
+                          complete: function(){
+                              // Действия, которые будут выполнены после завершения ajax-запроса
+                              $('.lds-ring').css('display', 'none');
+                              location = '{{ reload_link }}&user_token={{ user_token }}&type=products'
+                          },
+                          // функция успешного ответа сервера
+                          success     : function( respond, status, jqXHR ) {
+
+                          },
+                          // функция ошибки ответа сервера
+                          error: function( jqXHR, status, errorThrown ) {
+                          }
+                      });
+                  }
+              })
+          </script>
+          <script>
+            $('input[name=\'product_name\']').autocomplete({
+                source: function(request, response) {
+                    $.ajax({
+                        url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+                        dataType: 'json',
+                        success: function(json) {
+                            response($.map(json, function(item) {
+                                return {
+                                    label: item['name'],
+                                    value: item['product_id']
+                                }
+                            }));
+                        }
+                    });
+                },
+                select: function(item) {
+                    $('input[name=\'product_name\']').val('');
+                    $('#export-product' + item['value']).remove();
+                    $('#export-product').append('<div id="export-product' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product[]" value="' + item['value'] + '" /></div>');
+                }
+            });
+            $('#list-category').delegate('.fa-minus-circle', 'click', function() {
+                let categoryId = $(this).next().val()
+                let products_elems = $('#export-product').find('div')
+                for (let i = 0; i < products_elems.length; i++) {
+                    let el_data = $(products_elems[i]).data('categoryId')
+                    let index = el_data.indexOf(parseInt(categoryId));
+                    if (index > -1) {
+                        el_data.splice(index, 1);
+                    }
+                    if (el_data.length === 0) {
+                        $(products_elems[i]).remove()
+                    } else {
+                        $(products_elems[i]).attr('data-category-id', '[' + el_data + ']')
+                    }
+                }
+                $(this).parent().remove();
+            });
+            $('#export-product').delegate('.fa-minus-circle', 'click', function() {
+                $(this).parent().remove();
+            });
+            $('#select-products-categories').on('change', function() {
+                let categoryName = $(this).find('option:selected').text()
+                let categoryId   = $(this).val()
+                $.ajax({
+                    url: 'index.php?route=extension/module/import_export_name_compare_nik/getProductsByCategory&user_token={{ user_token }}&category_id=' +  $(this).val(),
+                    dataType: 'json',
+                    success: function(json) {
+                        if(categoryId !== '0') {
+                            $('#list-category' + categoryId).remove();
+                            $('#list-category').append('<div id="list-category' + categoryId + '"><i class="fa fa-minus-circle"></i> ' + categoryName + '<input type="hidden" name="category[]" value="' + categoryId + '" /></div>');
+                        } else {
+                            $.ajax({
+                                url: 'index.php?route=extension/module/import_export_name_compare_nik/getAllCategories&user_token={{ user_token }}',
+                                dataType: 'json',
+                                success: function(json) {
+                                    let array = $.map(json, function(item) {
+                                        return {
+                                            label: item['name'],
+                                            value: item['category_id'],
+                                        }
+                                    })
+                                    for (let item in array) {
+                                        if(array.hasOwnProperty(item)) {
+                                            $('#list-category' + array[item]['value']).remove();
+                                            $('#list-category').append('<div id="list-category' + array[item]['value'] + '"><i class="fa fa-minus-circle"></i> ' + array[item]['label'] + '<input type="hidden" name="category[]" value="' + array[item]['value'] + '" /></div>');
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                        let array = $.map(json, function(item) {
+                            return {
+                                label:          item['name'],
+                                value:          item['product_id'],
+                                categories_id:  item['categories_id'],
+                                category_id:    item['category_id']
+                            }
+                        })
+                        for (let item in array) {
+                            if(array.hasOwnProperty(item)) {
+                                $('#export-product' + array[item]['value']).remove();
+                                let product_el = '<div id="export-product' + array[item]['value'] + '" data-category-id="[';
+                                if(array[item]['category_id'] === '') {
+                                    for (let i = 0; i < array[item]['categories_id'].length; i++) {
+                                        if (i < array[item]['categories_id'].length - 1) {
+                                            product_el += array[item]['categories_id'][i] + ','
+                                        } else {
+                                            product_el += array[item]['categories_id'][i]
+                                        }
+                                    }
+                                } else {
+                                    product_el += array[item]['category_id']
+                                }
+                                product_el += ']"><i class="fa fa-minus-circle"></i> ' + array[item]['label'] + '<input type="hidden" name="product[]" value="' + array[item]['value'] + '" /></div>';
+                                $('#export-product').append(product_el);
+                            }
+                        }
+                    }
+                });
+            })
+            function clearProductsList() {
+                $('#list-category div').each(function (i, item) {
+                    $(item).remove()
+                });
+                $('#export-product div').each(function (i, item) {
+                    $(item).remove()
+                });
+                $('#select-products-categories option:first').prop('selected', true);
+            }
+            $('.products-clear-btn').on('click', function () {
+                clearProductsList()
+            })
+          </script>
+          <script>
+              $('.select-product-options').on('click', function () {
+                  $('input[type="checkbox"]').prop('checked', true)
+              })
+              $('.unselect-product-options').on('click', function () {
+                  $('input[type="checkbox"]').prop('checked', false)
+              })
+          </script>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}
