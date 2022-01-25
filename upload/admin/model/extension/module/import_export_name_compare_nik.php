@@ -1,5 +1,19 @@
 <?php
 class ModelExtensionModuleImportExportNameCompareNik extends Model {
+    public function install() {
+        $this->db->query("
+            CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "product_parser_info` (
+              `product_id` INT(11) NOT NULL,
+              `percent` VARCHAR(255) NOT NULL,
+              PRIMARY KEY (`product_id`)
+            ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+		");
+    }
+
+    public function uninstall() {
+        $this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "product_parser_info`");
+    }
+
     protected $null_array = array();
 
     public function getProductIdByModel($model) {
@@ -2344,6 +2358,10 @@ class ModelExtensionModuleImportExportNameCompareNik extends Model {
                 $attributs[$language_code] = $attribut;
             }
 
+            if(isset($first_row[$j - 1]) && $first_row[$j-1] == "percent") {
+                $deviant_percent = $this->getCell($data, $i, $j++);
+            }
+
             $product = array();
             $product['product_id'] = $product_id;
 
@@ -2431,6 +2449,9 @@ class ModelExtensionModuleImportExportNameCompareNik extends Model {
             }
             if(isset($sort_order)) {
                 $product['sort_order'] = $sort_order;
+            }
+            if(isset($deviant_percent)) {
+                $product['deviant_percent'] = $deviant_percent;
             }
             $product['descriptions'] = $descriptions;
             $product['meta_titles'] = $meta_titles;
@@ -2580,6 +2601,11 @@ class ModelExtensionModuleImportExportNameCompareNik extends Model {
 
             $this->db->query($sql);
 
+            if (isset($product['deviant_percent'])) {
+                $this->db->query("DELETE FROM " . DB_PREFIX . "product_parser_info WHERE product_id = '" . (int)$query->row['product_id'] . "'");
+                $this->db->query("INSERT INTO " . DB_PREFIX . "product_parser_info SET product_id = '" . (int)$query->row['product_id'] . "', percent = '" . (int)$product['deviant_percent'] . "'");
+            }
+
             foreach ($languages as $language) {
                 $language_code = $language['code'];
                 $language_id = $language['language_id'];
@@ -2693,6 +2719,10 @@ class ModelExtensionModuleImportExportNameCompareNik extends Model {
             $sql .=", date_modified = NOW(), date_added = NOW()";
 
             $this->db->query($sql);
+
+            if (isset($product['deviant_percent'])) {
+                $this->db->query("INSERT INTO " . DB_PREFIX . "product_parser_info SET product_id = '" . (int)$product_id . "', percent = '" . (int)$product['deviant_percent'] . "'");
+            }
 
             foreach ($languages as $language) {
                 $language_code = $language['code'];

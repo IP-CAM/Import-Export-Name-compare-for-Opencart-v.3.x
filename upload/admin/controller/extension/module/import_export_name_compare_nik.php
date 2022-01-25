@@ -13,6 +13,9 @@ class ControllerExtensionModuleImportExportNameCompareNik extends Controller {
 			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
 		}
 
+        $this->load->model('extension/module/import_export_name_compare_nik');
+        $this->model_extension_module_import_export_name_compare_nik->install();
+
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
@@ -422,6 +425,22 @@ class ControllerExtensionModuleImportExportNameCompareNik extends Controller {
         }
 
         return $img_names;
+    }
+
+    public function install() {
+        if ($this->user->hasPermission('modify', 'extension/module/import_export_name_compare_nik')) {
+            $this->load->model('extension/module/import_export_name_compare_nik');
+
+            $this->model_extension_module_import_export_name_compare_nik->install();
+        }
+    }
+
+    public function uninstall() {
+        if ($this->user->hasPermission('modify', 'extension/module/import_export_name_compare_nik')) {
+            $this->load->model('extension/module/import_export_name_compare_nik');
+
+            $this->model_extension_module_import_export_name_compare_nik->uninstall();
+        }
     }
 
 	protected function validate() {

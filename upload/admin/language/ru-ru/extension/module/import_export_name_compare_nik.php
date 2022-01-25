@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']    = 'Импopт / Экспорт Excel с объединением ячеек';
+$_['heading_title']    = 'Импopт / Экспорт Excel с объединением ячеек (Для парсера)';
 
 // Text
 $_['text_extension']   = 'Расширения';
